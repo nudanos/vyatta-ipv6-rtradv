@@ -1,3 +1,9 @@
+vyatta-ipv6-rtradv (1.36) trixie; urgency=medium
+
+  * Port to Debian 13 (trixie): debhelper-compat 13, Standards-Version 4.7.2, Rules-Requires-Root, NuDanOS Vcs.
+
+ -- NuDanOS Maintainers <jon@fernandez.tech>  Mon, 28 Sep 2026 22:30:16 -0700
+
 vyatta-ipv6-rtradv (1.35) unstable; urgency=medium
 
   * Add delete action for IPv6 DAD number of probes

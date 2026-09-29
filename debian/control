@@ -1,9 +1,15 @@
 Source: vyatta-ipv6-rtradv
-Section: contrib/net
+Section: net
 Priority: optional
-Maintainer: Vyatta Package Maintainers <DL-vyatta-help@att.com>
-Build-Depends: debhelper (>= 9), autotools-dev, autoconf, automake, cpio
-Standards-Version: 3.9.8
+Maintainer: NuDanOS Maintainers <jon@fernandez.tech>
+Build-Depends: debhelper-compat (= 13),
+ autoconf,
+ automake,
+ cpio
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+Vcs-Git: https://github.com/nudanos/vyatta-ipv6-rtradv.git
+Vcs-Browser: https://github.com/nudanos/vyatta-ipv6-rtradv
 
 Package: vyatta-ipv6-rtradv
 Architecture: all
@@ -20,7 +26,7 @@ Description: Vyatta config and op mode templates for IPv6 Router Advertisements
 
 Package: vyatta-ipv6-rtradv-groups-v1-yang
 Architecture: all
-Depends:
+Depends: 
  vyatta-ipv6-rtradv,
  ${misc:Depends}, ${yang:Depends}
 Description: vyatta-ipv6-rtradv-groups-v1 module
@@ -28,7 +34,7 @@ Description: vyatta-ipv6-rtradv-groups-v1 module
 
 Package: vyatta-ipv6-rtradv-v1-yang
 Architecture: all
-Depends:
+Depends: 
  vyatta-ipv6-rtradv-groups-v1-yang,
  vyatta-interfaces-bonding-v1-yang,
  vyatta-interfaces-bridge-v1-yang,
