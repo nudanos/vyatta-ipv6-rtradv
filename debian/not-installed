@@ -1,0 +1,9 @@
+etc/modprobe.d/ipv6.conf
+usr/sbin/vyatta-ipv6-autoconf.sh
+usr/sbin/vyatta-ipv6-eui64.pl
+usr/sbin/vyatta-ipv6-forwarding.sh
+usr/sbin/vyatta-ipv6-link-local.pl
+usr/sbin/vyatta-ipv6-rtradv.sh
+usr/sbin/vyatta_gen_radvd.pl
+usr/share/configd/yang/vyatta-ipv6-rtradv-groups-v1.yang
+usr/share/configd/yang/vyatta-ipv6-rtradv-v1.yang
