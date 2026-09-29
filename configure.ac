@@ -16,7 +16,7 @@ AC_INIT([vyatta-ipv6-rtradv], VERSION_ID, [vyatta-support@vyatta.com])
 test -n "$VYATTA_VERSION" || VYATTA_VERSION=$PACKAGE_VERSION
 
 AC_CONFIG_AUX_DIR([config])
-AM_INIT_AUTOMAKE([gnu no-dist-gzip dist-bzip2 subdir-objects])
+AM_INIT_AUTOMAKE([foreign no-dist-gzip dist-bzip2 subdir-objects])
 AC_PREFIX_DEFAULT([/opt/vyatta])
 
 AC_ARG_ENABLE([nostrip],
