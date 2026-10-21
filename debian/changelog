@@ -1,3 +1,13 @@
+vyatta-ipv6-rtradv (1.37) trixie; urgency=medium
+
+  * Code-quality lint fixes (distro docs/porting.md): analyzer findings
+    fixed, see the git log.
+  * vyatta-ipv6-forwarding.sh creates and removes its ipv6_no_fwd marker
+    on tunnel interfaces too (exec ip6tables ended the script early).
+  * Tests for vyatta_gen_radvd.pl, run by the build.
+
+ -- NuDanOS Maintainers <jon@fernandez.tech>  Wed, 21 Oct 2026 17:36:33 +0000
+
 vyatta-ipv6-rtradv (1.36) trixie; urgency=medium
 
   * Port to Debian 13 (trixie): debhelper-compat 13, Standards-Version 4.7.2, Rules-Requires-Root, NuDanOS Vcs.
