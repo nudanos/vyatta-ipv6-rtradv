@@ -57,13 +57,24 @@ sub ipv6_disabled {
     my $name = shift;
     open my $f, '<', "/proc/sys/net/ipv6/conf/$name/disable_ipv6"
       or return;
-    chomp (my $disabled = <$f>);
+    chomp( my $disabled = <$f> );
     close $f;
     return $disabled;
 }
 
+# the output of a shell command, as backticks gave it, with $? set; undef
+# if it cannot run
+sub command_output {
+    my ($cmd) = @_;
+    open( my $fh, '-|', $cmd ) or return;
+    my $out = do { local $/ = undef; <$fh> }
+      // q{};
+    close $fh;
+    return $out;
+}
+
 sub usage {
-    print <<EOF;
+    print <<"EOF";
 Usage:	$0 --create ifname ipv6address/64
 	$0 --delete ifname ipv6address/64
 EOF
@@ -77,7 +88,7 @@ sub get_mac_address {
 
         # Get 48-bit MAC addr of $ifname
         open my $sysfs, '<', "/sys/class/net/$ifname/address"
-          or die "can't open /sys/class/net/$ifname/address: $!";
+          or die "can't open /sys/class/net/$ifname/address: $!\n";
         $macaddr = <$sysfs>;
         close $sysfs;
         chomp $macaddr;
@@ -92,12 +103,12 @@ sub get_mac_address {
 
 sub get_uuid_eui64 {
     my $ifname = shift;
-    my $uuid   = `/usr/sbin/dmidecode -s system-uuid`;
+    my $uuid   = command_output('/usr/sbin/dmidecode -s system-uuid');
     die "Error: no system UUID found\n" unless ( defined($uuid) );
     chomp($uuid);
 
     # Extract node identifier as last 6 octets from UUID as per RFC4122
-    my @nodeid = lc( substr( $uuid, -12, 12 ) ) =~ /([0-9a-f]{4})/g;
+    my @nodeid = lc( substr( $uuid, -12, 12 ) ) =~ /([0-9a-f]{4})/gx;
     die "Error: no valid system UUID found\n" unless ( $#nodeid == 2 );
 
     # Set universal/local bit to indicate local scope
@@ -119,7 +130,7 @@ sub get_address {
     die "Error: Interface $ifname does not exist.\n"
       unless ( -d "/proc/sys/net/ipv6/conf/$ifname" );
 
-    my $ip = new Net::IP($address);
+    my $ip = Net::IP->new($address);
     die "Error: not a valid IPv6 prefix: $address\n"
       unless defined($ip);
 
@@ -136,20 +147,22 @@ sub get_address {
         # Modified EUI-64 is constructed from the IPv4 address given
         # in the h/w address as per RFC5342 section 2.2.1
         @eui64 = ( "0200", "5efe", "$ea[0]$ea[1]", "$ea[2]$ea[3]" );
-    } elsif ( $#ea == 5 ) {
+    }
+    elsif ( $#ea == 5 ) {
 
         # flip locally assigned bit per RFC 2373
         $ea[0] = sprintf( "%x", hex( $ea[0] ) ^ 0x2 );
 
         # construct EUI64 address array
         @eui64 = ( "$ea[0]$ea[1]", "$ea[2]ff", "fe$ea[3]", "$ea[4]$ea[5]" );
-    } else {
+    }
+    else {
         @eui64 = get_uuid_eui64($ifname);
     }
 
     # Form 128-bit IPv6 addr based by adding the host part to the prefix
-    my $eui64suffix = new Net::IP("::" . join ":", @eui64);
-    my $ipv6_addr = $ip->binadd($eui64suffix);
+    my $eui64suffix = Net::IP->new( "::" . join ":", @eui64 );
+    my $ipv6_addr   = $ip->binadd($eui64suffix);
     return $ipv6_addr->ip . "/64";
 }
 
@@ -159,16 +172,16 @@ sub create_addr {
 
     # If IPv6 is disabled, the address cannot be added in the kernel. Do not
     # run the command so as not to lose the address from the configuration.
-    if (ipv6_disabled($ifname)) {
-      exit 0;
+    if ( ipv6_disabled($ifname) ) {
+        exit 0;
     }
+
     # Assign addr to $ifname
-    my $intf = new Vyatta::Interface($ifname);
+    my $intf = Vyatta::Interface->new($ifname);
     $intf or die "Unknown interface name/type: $ifname\n";
-    my $cmd_prefix =
-      $intf->can("vrf_cmd_prefix") ? $intf->vrf_cmd_prefix() : "";
-    my $result     = `${cmd_prefix}ip -6 addr add $ipv6_addr dev $ifname 2>&1`;
-    if ($? && index($result, "File exists") == -1) {
+    my $cmd_prefix = $intf->can("vrf_cmd_prefix") ? $intf->vrf_cmd_prefix() : "";
+    my $result     = command_output("${cmd_prefix}ip -6 addr add $ipv6_addr dev $ifname 2>&1");
+    if ( $? && index( $result, "File exists" ) == -1 ) {
         die "Error: Couldn't assign IPv6 addr $ipv6_addr to $ifname\n";
     }
 
@@ -181,17 +194,16 @@ sub delete_addr {
 
     # If IPv6 is disabled, the address cannot be deleted in the kernel. Do not
     # run the command so as not to lose this change from the configuration.
-    if (ipv6_disabled($ifname)) {
-      exit 0;
+    if ( ipv6_disabled($ifname) ) {
+        exit 0;
     }
 
     # Attempt to delete addr from $ifname...
     # Requested address may not exist if mac given externally, so ignore error
-    my $intf = new Vyatta::Interface($ifname);
+    my $intf = Vyatta::Interface->new($ifname);
     $intf or die "Unknown interface name/type: $ifname\n";
-    my $cmd_prefix =
-      $intf->can("vrf_cmd_prefix") ? $intf->vrf_cmd_prefix() : "";
-    my $result     = `${cmd_prefix}ip -6 addr del $ipv6_addr dev $ifname 2>&1`;
+    my $cmd_prefix = $intf->can("vrf_cmd_prefix") ? $intf->vrf_cmd_prefix() : "";
+    my $result     = command_output("${cmd_prefix}ip -6 addr del $ipv6_addr dev $ifname 2>&1");
     if ( $? && ( !defined($mac) || index( $result, "Cannot assign" ) == -1 ) ) {
         die "Warning: Couldn't delete IPv6 addr $ipv6_addr from $ifname\n";
     }

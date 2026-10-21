@@ -1,0 +1,12 @@
+exit 1
+Error: MaxRtrAdvInterval value is 2000. It must be 1800 or less.
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    old-section;
+interface dp0s3 {
+interface dp0s30 {
+interface dp0s3x3 {
+};
+};
+};

@@ -5,16 +5,14 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 
-if [ "$COMMIT_ACTION" = "SET" -o "$COMMIT_ACTION" = "ACTIVE" ]; then
+if [ "$COMMIT_ACTION" = "SET" ] || [ "$COMMIT_ACTION" = "ACTIVE" ]; then
     echo "Re-generating radvd config file for interface $1..."
-    /opt/vyatta/sbin/vyatta_gen_radvd.pl --generate $1
-    if [ $? != 0 ]; then
+    if ! /opt/vyatta/sbin/vyatta_gen_radvd.pl --generate "$1"; then
 	exit 1
     fi
 elif [ "$COMMIT_ACTION" = "DELETE" ]; then
     echo "Deleting entry for interface $1 from radv config file..."
-    /opt/vyatta/sbin/vyatta_gen_radvd.pl --delete $1
-    if [ $? != 0 ]; then
+    if ! /opt/vyatta/sbin/vyatta_gen_radvd.pl --delete "$1"; then
 	exit 1
     fi
 else 

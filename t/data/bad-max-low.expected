@@ -1,0 +1,12 @@
+exit 1
+Error: MaxRtrAdvInterval valueis 3. It must be 4 or more
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    old-section;
+interface dp0s3 {
+interface dp0s30 {
+interface dp0s3x3 {
+};
+};
+};

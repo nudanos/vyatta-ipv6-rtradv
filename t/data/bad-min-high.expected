@@ -1,0 +1,13 @@
+exit 1
+Error: MinRtrAdvInterval is 500 and MaxRtrAdvInterval is 600.
+MinRtrAdvInterval must be no greater than 3/4 MaxRtrAdvInterval
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    old-section;
+interface dp0s3 {
+interface dp0s30 {
+interface dp0s3x3 {
+};
+};
+};

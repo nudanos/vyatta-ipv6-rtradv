@@ -1,0 +1,13 @@
+exit 1
+Error: AdvDefaultLifetime is 100 and MaxRtrAdvInterval is 600.
+AdvDefaultLifetime must equal to or greater than MaxRtrAdvInterval.
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    old-section;
+interface dp0s3 {
+interface dp0s30 {
+interface dp0s3x3 {
+};
+};
+};

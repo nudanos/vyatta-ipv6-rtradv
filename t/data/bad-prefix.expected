@@ -1,0 +1,14 @@
+exit 1
+Error: You have set preferred-lifetime to 200
+and valid-lifetime to 100.
+preferred-lifetime must be less than or equal to valid-lifetime.
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    old-section;
+interface dp0s3 {
+interface dp0s30 {
+interface dp0s3x3 {
+};
+};
+};

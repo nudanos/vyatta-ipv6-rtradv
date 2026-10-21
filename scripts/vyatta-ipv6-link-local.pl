@@ -31,10 +31,9 @@ use Getopt::Long;
 use Net::IP;
 use Vyatta::Interface;
 
-use constant {
-    EUI64 => 0,
-    NONE  => 1
-};
+# addr_gen_mode values
+my $EUI64 = 0;
+my $NONE  = 1;
 
 my @update;
 my @delete;
@@ -52,7 +51,7 @@ delete_ll_addr(@delete) if (@delete);
 exit 0;
 
 sub usage {
-    print <<EOF;
+    print <<"EOF";
 Updates or deletes configured link-local IPv6 address on the interface
 Usage:	$0 --update <ifname> <IPv6address> [--verbose]
 	$0 --delete <ifname> <IPv6address> [--verbose]
@@ -79,29 +78,32 @@ sub update_ll_addr {
     die "Error: Interface $ifname does not exist.\n"
       unless ( -d "/proc/sys/net/ipv6/conf/$ifname" );
 
-    my $ip = new Net::IP($address);
+    my $ip = Net::IP->new($address);
 
     my $type = ( $ip->iptype() );
-    die "Error: not a valid link-local IPv6 address: $address"
+    die "Error: not a valid link-local IPv6 address: $address\n"
       if ( $type ne "LINK-LOCAL-UNICAST" );
 
-    my $intf = new Vyatta::Interface($ifname);
+    my $intf = Vyatta::Interface->new($ifname);
     $intf or die "Unknown interface name/type: $ifname\n";
-    my @ll_addr_line =
-      grep /net6/, qx(ip -6 addr show dev $ifname scope link);
+    open( my $ip_out, '-|', 'ip', '-6', 'addr', 'show', 'dev', $ifname, 'scope', 'link' )
+      or die "Cannot run ip: $!\n";
+    my @ll_addr_line = grep { /net6/x } <$ip_out>;
+    close $ip_out;
 
     for ( my $i = 0 ; $i <= $#ll_addr_line ; $i++ ) {
 
         my @addr_line = split( ' ', $ll_addr_line[$i] );
-        my $ll_addr = $addr_line[1];
+        my $ll_addr   = $addr_line[1];
         if ( system("ip -6 addr del $ll_addr dev $ifname") != 0 ) {
             warn "Delete $ll_addr on $ifname failed \n";
         }
     }
     if ( system("ip -6 addr add $address/64 dev $ifname") != 0 ) {
         warn "IPv6 address $address on $ifname add failed \n";
-    } elsif ($verbose) {
-        ipv6_addr_gen_mode( $ifname, NONE );
+    }
+    elsif ($verbose) {
+        ipv6_addr_gen_mode( $ifname, $NONE );
         print "$address replaced any other link-local addresses on $ifname \n";
     }
 
@@ -110,13 +112,13 @@ sub update_ll_addr {
 
 sub delete_ll_addr {
     my ( $ifname, $address ) = @_;
-    my $intf = new Vyatta::Interface($ifname);
+    my $intf = Vyatta::Interface->new($ifname);
     $intf or die "Unknown interface name/type: $ifname\n";
 
     if ( system("ip -6 addr del $address/64 dev $ifname") != 0 ) {
         warn "IPv6 address $address on $ifname delete failed \n";
     }
-    ipv6_addr_gen_mode( $ifname, EUI64 );
+    ipv6_addr_gen_mode( $ifname, $EUI64 );
     print "IPv6 link-local address autoconfiguration enabled on $ifname \n"
       if $verbose;
     exit 0;

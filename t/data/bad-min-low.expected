@@ -1,0 +1,12 @@
+exit 1
+Error: MinRtrAdvInterval value is 2. It must be 3 or more
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    IgnoreIfMissing on;
+    old-section;
+interface dp0s3 {
+interface dp0s30 {
+interface dp0s3x3 {
+};
+};
+};
